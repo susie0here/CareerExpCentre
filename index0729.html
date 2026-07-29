@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>擬真職場體驗館</title>
+    <style>
+        :root {
+            --bg-primary: #fffbf2;
+            --bg-card: #fffcf8;
+            --bg-card-hover: #f1f5f9;
+            --bg-subtle: #f5efe6;
+            --accent-blue: #3b82f6;
+            --accent-blue-light: #60a5fa;
+            --accent-pink: #ec4899;
+            --accent-pink-light: #f472b6;
+            --accent-yellow: #d97706;
+            --accent-yellow-light: #facc15;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(148, 163, 184, 0.08);
+            --shadow-md: 0 8px 24px rgba(148, 163, 184, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans CH", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(255, 253, 253, 0.88);
+            backdrop-filter: blur(12px);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .api-key-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.3rem;
+            position: relative;
+        }
+
+        .api-key-box {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #f1f5f9;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .api-key-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            outline: none;
+            width: 130px;
+        }
+
+        .btn-api-submit {
+            background: linear-gradient(135deg, var(--accent-blue-light), var(--accent-pink-light));
+            color: #ffffff;
+            border: none;
+            padding: 0.25rem 0.7rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-api-submit:hover {
+            opacity: 0.95;
+            transform: scale(1.02);
+        }
+
+        .api-status-tag {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .passport-status {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: #f1f5f9;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .badge-count { color: var(--accent-yellow); font-weight: bold; }
+
+        .container {
+            max-width: 1200px;
+            margin: 1.8rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .hall-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .hall-header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 0.4rem;
+            background: linear-gradient(135deg, #2563eb, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hall-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .filter-tags {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+        }
+
+        .tag-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.45rem 1.1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tag-btn.active, .tag-btn:hover {
+            background: linear-gradient(135deg, #bfdbfe, #fbcfe8);
+            color: #1e3a8a;
+            font-weight: bold;
+            border-color: #93c5fd;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.3rem;
+        }
+
+        .room-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.3rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .room-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue-light);
+            box-shadow: var(--shadow-md);
+            background: #fdfefe;
+        }
+
+        .room-type-tag {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 10px;
+            font-weight: bold;
+            float: right;
+        }
+
+        .type-objective { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .type-llm { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
+
+        .room-title { font-size: 1.1rem; font-weight: 700; margin: 0.5rem 0 0.3rem 0; color: var(--text-main); }
+        .room-roles { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.8rem; line-height: 1.3; }
+        .room-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.7rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .room-view {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.8rem;
+            animation: fadeIn 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover { color: var(--text-main); border-color: #cbd5e1; background: #e2e8f0; }
+
+        .npc-stage {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            background: #f8fafc;
+            padding: 1.1rem 1.3rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.3rem;
+        }
+
+        .npc-avatar-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eff6ff, #fdf2f8);
+            border: 2px solid var(--accent-blue-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .npc-avatar-box svg { width: 100%; height: 100%; }
+        .npc-name { font-weight: bold; color: var(--accent-blue); font-size: 0.98rem; }
+        .npc-title-tag { font-size: 0.75rem; color: #be185d; background: #fdf2f8; border: 1px solid #fbcfe8; padding: 0.1rem 0.5rem; border-radius: 4px; margin-left: 0.4rem; }
+        .npc-text { font-size: 0.92rem; color: var(--text-main); margin-top: 0.3rem; line-height: 1.4; }
+
+        .workspace-panel {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.3rem;
+        }
+
+        .task-title { font-size: 1.1rem; font-weight: bold; color: #b45309; margin-bottom: 0.4rem; }
+        .task-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 1.2rem; }
+
+        .excel-table-sim {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: monospace;
+            font-size: 0.88rem;
+            margin-bottom: 1.2rem;
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .excel-table-sim th, .excel-table-sim td {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            text-align: center;
+        }
+
+        .excel-table-sim th { background: #f1f5f9; color: var(--accent-blue); font-weight: bold; }
+        .excel-table-sim input {
+            background: #ffffff;
+            border: 1px solid var(--accent-blue-light);
+            color: #047857;
+            padding: 0.35rem;
+            width: 100%;
+            font-family: monospace;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .terminal-box {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: #38bdf8;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .input-field {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-main);
+            padding: 0.7rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            outline: none;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        textarea.input-field { resize: vertical; min-height: 90px; line-height: 1.5; }
+        .input-field:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-blue-light), var(--accent-pink-light));
+            color: #ffffff;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 14px rgba(96, 165, 250, 0.35);
+        }
+
+        .btn-action:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(244, 114, 182, 0.35);
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 1.3rem;
+            flex-direction: column;
+            gap: 0.9rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .objective-badge {
+            padding: 1rem 1.3rem;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.93rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            line-height: 1.5;
+        }
+
+        .badge-success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1.5px solid #a7f3d0;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+        }
+
+        .badge-error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1.5px solid #fecaca;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+        }
+
+        .analysis-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 1.1rem;
+            border-left: 5px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .analysis-card.pros { border-left-color: var(--accent-green); background: #f0fdf4; }
+        .analysis-card.cons { border-left-color: var(--accent-yellow); background: #fffbeb; }
+        .analysis-card.advice { border-left-color: var(--accent-blue); background: #eff6ff; }
+
+        .card-header { font-weight: bold; font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .pros .card-header { color: #047857; }
+        .cons .card-header { color: #b45309; }
+        .advice .card-header { color: #1d4ed8; }
+
+        .card-content { font-size: 0.88rem; color: var(--text-main); line-height: 1.55; white-space: pre-line; }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span></span> 擬真職場體驗館
+        </div>
+        <div class="header-controls">
+            <!-- API Key 頂欄提交區 -->
+            <div class="api-key-container">
+                <div class="api-key-box">
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">API Key:</span>
+                    <input type="password" id="api-key-input" placeholder="可輸入 Gemini Key">
+                    <button type="button" id="btn-verify-key" class="btn-api-submit" onclick="verifyApiKey()">提交</button>
+                </div>
+                <!-- 驗證狀態顯示 (綠色成功 / 紅色失敗) -->
+                <div id="api-key-status" class="api-status-tag" style="display:none;"></div>
+            </div>
+
+            <div class="passport-status">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">完成任務：</span>
+                <span class="badge-count" id="badge-count">0 / 16</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div id="hall-view">
+            <div class="hall-header">
+                <h1>具體職業．具體實戰體驗</h1>
+                <p>硬實力精確判斷對錯 ╳ 軟實力 LLM 導師評估，還原真實職場日常</p>
+            </div>
+
+            <div class="filter-tags">
+                <button class="tag-btn active" onclick="filterCategory('all')">全部展館 (16)</button>
+                <button class="tag-btn" onclick="filterCategory('tech')">科技 / AI / 數據</button>
+                <button class="tag-btn" onclick="filterCategory('biz')">商管 / 金融 / 行銷</button>
+                <button class="tag-btn" onclick="filterCategory('service')">服務 / 醫療 / 教育</button>
+                <button class="tag-btn" onclick="filterCategory('trade')">物流 / 工程 / 永續</button>
+            </div>
+
+            <div class="rooms-grid" id="rooms-grid"></div>
+        </div>
+
+        <div id="room-view" class="room-view">
+            <button class="btn-back" onclick="backToHall()">← 返回大廳選單</button>
+            
+            <div class="npc-stage">
+                <div class="npc-avatar-box" id="npc-avatar"></div>
+                <div>
+                    <div>
+                        <span class="npc-name" id="npc-name">導師姓名</span>
+                        <span class="npc-title-tag" id="npc-role-tag">職涯導師</span>
+                    </div>
+                    <div class="npc-text" id="npc-text">歡迎來到本館！</div>
+                </div>
+            </div>
+
+            <div class="workspace-panel">
+                <div class="task-title" id="task-title">任務名稱</div>
+                <div class="task-desc" id="task-desc">任務說明...</div>
+
+                <div id="form-workspace"></div>
+
+                <!-- 展館任務提交按鈕 -->
+                <button class="btn-action" id="btn-submit" onclick="submitTask()">
+                    <span id="btn-text">提交任務驗證</span>
+                    <span id="btn-spinner" class="loading-spinner" style="display:none;"></span>
+                </button>
+
+                <!-- 展館結果反饋容器 -->
+                <div class="result-container" id="result-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 全域已保存的有效 API Key
+        let globalVerifiedApiKey = "";
+
+        // API Key 頂欄提交與驗證邏輯
+        async function verifyApiKey() {
+            const input = document.getElementById('api-key-input');
+            const btn = document.getElementById('btn-verify-key');
+            const statusTag = document.getElementById('api-key-status');
+            const val = input.value.trim();
+
+            if (!val) {
+                statusTag.style.display = 'block';
+                statusTag.className = 'api-status-tag badge-error';
+                statusTag.innerText = '✗ 請輸入 API Key 後再提交！';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "連線中...";
+            statusTag.style.display = 'none';
+
+            try {
+                // 使用 Google Models API 端點發起輕量級測試請求
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${val}`);
+                
+                if (response.ok) {
+                    globalVerifiedApiKey = val;
+                    input.value = "";
+                    statusTag.style.display = 'block';
+                    statusTag.className = 'api-status-tag badge-success';
+                    statusTag.innerText = '✓ API Key 連線成功並已保存！';
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `HTTP ${response.status} (${response.statusText})`;
+                    statusTag.style.display = 'block';
+                    statusTag.className = 'api-status-tag badge-error';
+                    statusTag.innerText = `✗ 連線失敗: ${errMsg}`;
+                }
+            } catch (err) {
+                statusTag.style.display = 'block';
+                statusTag.className = 'api-status-tag badge-error';
+                statusTag.innerText = `✗ 網路連線異常: ${err.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "提交";
+            }
+        }
+
+        function getCartoonAvatarSvg(type) {
+            const avatars = {
+                admin: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#e0f2fe"/><circle cx="50" cy="45" r="18" fill="#fbcfe8"/><circle cx="43" cy="42" r="2.5" fill="#1e293b"/><circle cx="57" cy="42" r="2.5" fill="#1e293b"/><path d="M45 52 Q50 56 55 52" fill="none" stroke="#e11d48" stroke-width="2"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#60a5fa"/></svg>`,
+                accounting: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fef3c7"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><circle cx="40" cy="42" r="6" fill="none" stroke="#3b82f6" stroke-width="2"/><circle cx="60" cy="42" r="6" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="46" y1="42" x2="54" y2="42" stroke="#3b82f6" stroke-width="2"/><circle cx="40" cy="42" r="2" fill="#1e293b"/><circle cx="60" cy="42" r="2" fill="#1e293b"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#64748b"/></svg>`,
+                hr: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fce7f3"/><circle cx="50" cy="45" r="18" fill="#fde047"/><circle cx="43" cy="44" r="2.5" fill="#1e293b"/><circle cx="57" cy="44" r="2.5" fill="#1e293b"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#f472b6"/></svg>`,
+                tech: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#e0e7ff"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><rect x="35" y="38" width="30" height="10" rx="3" fill="#60a5fa"/><circle cx="43" cy="43" r="2" fill="#34d399"/><circle cx="57" cy="43" r="2" fill="#34d399"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#475569"/></svg>`,
+                marketing: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fbcfe8"/><circle cx="50" cy="45" r="18" fill="#fbcfe8"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#ec4899"/></svg>`,
+                sales: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#dbeafe"/><circle cx="50" cy="45" r="18" fill="#ffedd5"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#2563eb"/></svg>`,
+                hotel: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fef9c3"/><circle cx="50" cy="45" r="18" fill="#fde047"/><rect x="30" y="22" width="40" height="8" rx="2" fill="#facc15"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#d97706"/></svg>`,
+                edu: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#e0f2fe"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><polygon points="50,15 20,28 80,28" fill="#3b82f6"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#1d4ed8"/></svg>`,
+                medical: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#d1fae5"/><circle cx="50" cy="45" r="18" fill="#ffedd5"/><rect x="35" y="20" width="30" height="12" rx="3" fill="#ffffff"/><path d="M47 23 H53 V29 H47 Z" fill="#ef4444"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#10b981"/></svg>`,
+                logistics: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fef3c7"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><path d="M28 32 Q50 20 72 32 L75 38 H25 Z" fill="#facc15"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#b45309"/></svg>`,
+                ai: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#bfdbfe"/><circle cx="50" cy="45" r="18" fill="#e0f2fe"/><rect x="32" y="38" width="36" height="10" rx="3" fill="#f472b6"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#1e293b"/></svg>`,
+                data: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#dcfce7"/><circle cx="50" cy="45" r="18" fill="#ffedd5"/><circle cx="40" cy="43" r="7" fill="none" stroke="#10b981" stroke-width="2"/><circle cx="60" cy="43" r="7" fill="none" stroke="#10b981" stroke-width="2"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#047857"/></svg>`,
+                fintech: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fef3c7"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#334155"/><polygon points="50,62 60,72 50,82 40,72" fill="#facc15"/></svg>`,
+                esg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#dcfce7"/><circle cx="50" cy="45" r="18" fill="#fbcfe8"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#059669"/></svg>`,
+                digital: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#e0e7ff"/><circle cx="50" cy="45" r="18" fill="#fed7aa"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#4f46e5"/></svg>`,
+                engineer: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ffedd5"/><circle cx="50" cy="45" r="18" fill="#ffedd5"/><path d="M25 35 Q50 15 75 35 H20 Z" fill="#facc15"/><path d="M25 85 C25 65 35 60 50 60 C65 60 75 65 75 85 Z" fill="#c2410c"/></svg>`
+            };
+            return avatars[type] || avatars.admin;
+        }
+
+        const ROOMS_DATA = [
+            {
+                id: "01", category: "biz", type: "llm", title: "行政與辦公室管理", roles: "高階秘書、行政經理",
+                npcName: "行政主管 Karen", avatarType: "admin",
+                taskName: "董事會行程緊急調度與衝突協調",
+                desc: "董事會原定於 15:00-16:30 召開，但 CEO 突接獲通知必須搭乘 18:30 的國際航班前往簽約（需提前 2 小時抵達機場，車程 45 分鐘）。請寫出您的行程協調方案與彈性時間預留規劃。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的行程調整方案與時間規劃：</label>
+                        <textarea id="input_1" class="input-field" placeholder="請寫下您如何提早召開董事會、預留機場車程與簽約資料準備的具體安排..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "02", category: "biz", type: "objective", title: "會計與財務審計", roles: "會計師、審計專員",
+                npcName: "資深審計 Alex", avatarType: "accounting",
+                taskName: "Excel 實戰：員工薪務扣繳與 VLOOKUP 函數寫入",
+                desc: "請在下方模擬 Excel 試算表中，填入正確的公式與數值。已知員工 E002 的底薪需透過 VLOOKUP 於參考表（A2:B5）查找，且扣繳率固定為 10%。請寫出 D3 儲存格的 Excel 公式，以及 E3 的最終淨發薪資金額。",
+                render: () => `
+                    <table class="excel-table-sim">
+                        <thead>
+                            <tr><th></th><th>A (工號)</th><th>B (底薪)</th><th>C (姓名)</th><th>D (應扣稅額公式)</th><th>E (實發薪資)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>2</td><td>E001</td><td>$50,000</td><td>John</td><td>=B2*0.1</td><td>$45,000</td></tr>
+                            <tr><td>3</td><td>E002</td><td>$65,000</td><td>Mary</td><td><input id="input_1" placeholder="輸入 Excel 公式"></td><td><input id="input_2" placeholder="輸入數字例: 58500"></td></tr>
+                        </tbody>
+                    </table>
+                `,
+                checkAnswer: (inputs) => {
+                    const formula = inputs[0].value.trim().toUpperCase();
+                    const val = inputs[1].value.trim().replace(/[$,]/g, '');
+                    const isFormulaCorrect = formula.includes("VLOOKUP") || formula === "=B3*0.1";
+                    const isValCorrect = val === "58500";
+
+                    if (isFormulaCorrect && isValCorrect) {
+                        return { pass: true, msg: "驗算正確！公式邏輯無誤，實發薪資算得非常精準 ($65,000 - 10% = $58,500)。" };
+                    } else {
+                        return { pass: false, msg: `驗算失敗，原因如下：\n- 公式期望值：=VLOOKUP("E002", A2:B5, 2, FALSE)*0.1 或 =B3*0.1 (您的輸入: ${formula || '未填寫'})\n- 實發薪資金額期望值：58500 (您的輸入: ${val || '未填寫'})` };
+                    }
+                }
+            },
+            {
+                id: "03", category: "biz", type: "llm", title: "人力資源", roles: "HR BP、招募主管",
+                npcName: "HR 經理 Sarah", avatarType: "hr",
+                taskName: "關鍵技術人才搶奪與薪酬組合談判",
+                desc: "一位核心 AI 架構師候選人拿到競業 Offer，要求薪資高出公司預算 18%。請寫出您的非金錢誘因設計與談判策略。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的談判策略與綜合薪酬 Package 設計：</label>
+                        <textarea id="input_1" class="input-field" placeholder="包含簽約金、彈性工時、股票選擇權或職涯發展承諾..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "04", category: "tech", type: "objective", title: "資訊科技與網絡安全", roles: "資安分析師、系統管理員",
+                npcName: "資安專家 Dave", avatarType: "tech",
+                taskName: "資安日誌排查與 SQL Injection 攻擊特徵碼識別",
+                desc: "監控系統攔截到一段可疑 HTTP 請求。請分析下方 Terminal 日誌，指出哪一行包含 SQL 注入攻擊，並寫出該攻擊特徵碼關鍵字。",
+                render: () => `
+                    <div class="terminal-box">
+                        [Line 1] GET /index.php?id=101 HTTP/1.1 - 200 OK<br>
+                        [Line 2] POST /login.php username=admin' OR '1'='1 -- HTTP/1.1 - 302 Found<br>
+                        [Line 3] GET /static/css/style.css HTTP/1.1 - 340 Not Modified
+                    </div>
+                    <div class="input-group">
+                        <label>攻擊發生的行號 (例如: Line 2)：</label>
+                        <input id="input_1" class="input-field" placeholder="Line X">
+                    </div>
+                    <div class="input-group">
+                        <label>攻擊使用的 SQL 注入語法關鍵字：</label>
+                        <input id="input_2" class="input-field" placeholder="例: OR '1'='1'">
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const line = inputs[0].value.trim().toLowerCase();
+                    const keyword = inputs[1].value.trim().toUpperCase();
+                    if (line.includes("2") && keyword.includes("OR")) {
+                        return { pass: true, msg: "安全排查正確！Line 2 包含了典型的萬能密碼 SQL 注入攻擊 (' OR '1'='1)。" };
+                    }
+                    return { pass: false, msg: `排查錯誤，原因如下：\n- 正確攻擊行號：Line 2 (您的輸入: ${line || '未填寫'})\n- 關鍵字需包含 OR 語法 (您的輸入: ${keyword || '未填寫'})` };
+                }
+            },
+            {
+                id: "05", category: "biz", type: "llm", title: "市場行銷與電商", roles: "行銷總監、增長專家",
+                npcName: "行銷總監 Emily", avatarType: "marketing",
+                taskName: "新產品爆款文案 Hook 與 A/B 測試亮點設計",
+                desc: "一款主打「無咖啡因、3秒即溶」的助眠晚安茶即將上市，請設計兩套不同切入點（訴求痛點 vs 訴求生活方式）的廣告標題，並說明評估指標。",
+                render: () => `
+                    <div class="input-group">
+                        <label>文案 A (痛點切入) & 文案 B (生活方式切入)：</label>
+                        <textarea id="input_1" class="input-field" placeholder="寫下兩套文案標題與您的數據驗證法..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "06", category: "biz", type: "llm", title: "銷售與客戶關係", roles: "大客戶經理、Sales Director",
+                npcName: "銷售主管 Jason", avatarType: "sales",
+                taskName: "面對大客戶「競品便宜30%」的異議處置",
+                desc: "簽約前夕，關鍵客戶突告知：「競品價格比你們低 30%，如果不降價我們只能選擇對方。」請寫出您的應對策略，如何不降價並展現價值。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的異議化解與價值主張 (Value Proposition) 談判話術：</label>
+                        <textarea id="input_1" class="input-field" placeholder="從 TCO (總持有成本)、服務品質、售後保障或風險避險角度切入..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "07", category: "service", type: "llm", title: "餐旅與前線服務", roles: "飯店客房經理、前台主管",
+                npcName: "飯店經理 Clara", avatarType: "hotel",
+                taskName: "VIP 賓客嚴重過敏發作與現場危機復原",
+                desc: "一位 VIP 賓客在飯店餐廳誤食含花生食材引發輕微過敏，經隨店醫師處理後已無大礙，但賓客情緒極度不滿揚言媒體曝光。請寫出您的現場關懷與復原方案。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的危機應變與賓客關係復原 (Service Recovery) 步驟：</label>
+                        <textarea id="input_1" class="input-field" placeholder="包含誠摯道歉、責任調查、補償機制與流程改善承諾..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "08", category: "service", type: "llm", title: "教育與特殊教育支援", roles: "教學顧問、SEN 特教老師",
+                npcName: "教學顧問 Mark", avatarType: "edu",
+                taskName: "差異化教學：注意力不足 (ADHD) 學生的課堂融入",
+                desc: "分組討論課中，一名 ADHD 學生無法靜坐並干擾小組進行。請設計一套「分段式任務+視覺化獎勵」機制來引導其完成學習。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的教學活動調整與行為引導方案：</label>
+                        <textarea id="input_1" class="input-field" placeholder="寫下微任務拆解步驟、專屬角色分工 (如計時員) 與正向強化機制..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "09", category: "service", type: "objective", title: "醫療護理與急診分診", roles: "護理師、分診專家",
+                npcName: "護理長 Grace", avatarType: "medical",
+                taskName: "急診檢傷分類 (Triage) 與點滴滴速計算",
+                desc: "1. 患病者 A（胸痛、呼吸困難、冒冷汗）應歸類為幾級檢傷（1級-5級，1級最緊急）？<br>2. 遵醫囑給予 500ml 生理食鹽水，需在 4 小時內輸液完成，點滴套管點滴係數為 15 drops/ml，請問每分鐘滴速 (gtt/min) 應調整為多少滴？",
+                render: () => `
+                    <div class="input-group">
+                        <label>1. 患病者 A 的檢傷分級 (輸入數字 1-5)：</label>
+                        <input id="input_1" class="input-field" placeholder="例如: 1">
+                    </div>
+                    <div class="input-group">
+                        <label>2. 每分鐘點滴滴速 (gtt/min calculation)：</label>
+                        <input id="input_2" class="input-field" placeholder="例如: 31">
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const level = inputs[0].value.trim();
+                    const rate = Math.round(parseFloat(inputs[1].value.trim()));
+                    const isLevelCorrect = level === "1";
+                    const isRateCorrect = rate === 31 || rate === 32;
+
+                    if (isLevelCorrect && isRateCorrect) {
+                        return { pass: true, msg: "判定完全正確！胸痛冒冷汗屬 1 級急迫；輸液計算公式 (500×15)/240 = 31.25 滴/分，精準無誤！" };
+                    }
+                    return { pass: false, msg: `判定有誤，原因如下：\n- 正確檢傷級別：1 級 (復甦抗休克/心肌梗塞疑慮)\n- 正確滴速：約 31 滴/分 (計算公式: [500ml × 15]/240分鐘)` };
+                }
+            },
+            {
+                id: "10", category: "trade", type: "objective", title: "物流與供應鏈", roles: "物流經理、調度專員",
+                npcName: "物流總監 Tom", avatarType: "logistics",
+                taskName: "海運集裝箱 CBM 材積計算與裝載優化",
+                desc: "有一批貨物共 100 箱，每箱尺寸為長 50cm、寬 40cm、高 30cm。請計算這批貨物的總體積（CBM，立方米），並判斷是否能裝入剩餘空間為 15 CBM 的集裝箱中？",
+                render: () => `
+                    <div class="input-group">
+                        <label>1. 總 CBM 立方米數 (計算式: 0.5m × 0.4m × 0.3m × 100)：</label>
+                        <input id="input_1" class="input-field" placeholder="例如: 6">
+                    </div>
+                    <div class="input-group">
+                        <label>2. 能否裝入 15 CBM 剩餘空間 (請填可裝下 / 裝不下)：</label>
+                        <input id="input_2" class="input-field" placeholder="可裝下 / 裝不下">
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const cbm = parseFloat(inputs[0].value.trim());
+                    const canFit = inputs[1].value.trim();
+                    if (cbm === 6 && canFit.includes("可")) {
+                        return { pass: true, msg: "計算精準！單箱 0.06 CBM × 100 = 6 CBM，遠小於 15 CBM 空間，可順利裝載。" };
+                    }
+                    return { pass: false, msg: `計算錯誤，原因如下：\n- 單箱體積：0.5m×0.4m×0.3m = 0.06 CBM，100 箱總體積為 6 CBM (您的輸入: ${cbm || '未填寫'})\n- 6 CBM 小於 15 CBM，結果為『可裝下』` };
+                }
+            },
+            {
+                id: "11", category: "tech", type: "objective", title: "人工智慧與 Prompt 工程", roles: "AI 應用架構師",
+                npcName: "AI 科學家 Kevin", avatarType: "ai",
+                taskName: "Prompt 結構化約束：強制 JSON 格式輸出語法",
+                desc: "請在下方編寫一段 Prompt 指令關鍵字，限制大語言模型（LLM）必須且只能輸出嚴格的 JSON 格式，且禁止包含任何 Markdown 程式碼塊標籤（如 ```json）。",
+                render: () => `
+                    <div class="input-group">
+                        <label>您的 Prompt 格式約束指令：</label>
+                        <textarea id="input_1" class="input-field" placeholder="輸入包含 JSON、ONLY、NO MARKDOWN 等強約束關鍵字..."></textarea>
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const text = inputs[0].value.trim().toUpperCase();
+                    if (text.includes("JSON") && (text.includes("ONLY") || text.includes("只") || text.includes("嚴格") || text.includes("NO MARKDOWN") || text.includes("不"))) {
+                        return { pass: true, msg: "Prompt 設計合格！具備明確的格式約束 (JSON ONLY) 與邊界排除條款。" };
+                    }
+                    return { pass: false, msg: "Prompt 強約束不夠明確！必須包含『JSON』以及明確禁止 Markdown (如 ONLY, NO MARKDOWN, 嚴格限制) 的關鍵字。" };
+                }
+            },
+            {
+                id: "12", category: "tech", type: "objective", title: "數據分析與 SQL", roles: "數據分析師、BI 專家",
+                npcName: "首席數據官 Ray", avatarType: "data",
+                taskName: "SQL 實戰：撰寫高價值客戶（LTV）聚類查詢",
+                desc: "請撰寫一條 SQL 查詢，從 `orders` 資料表中，找出總消費金額（`SUM(amount)`）大於 1000 的客戶 ID（`customer_id`）。",
+                render: () => `
+                    <div class="terminal-box">
+                        -- 表結構: orders (id, customer_id, amount, created_at)<br>
+                        SELECT customer_id, SUM(amount) FROM orders ...
+                    </div>
+                    <div class="input-group">
+                        <label>請寫出完整的 SQL 查詢語法：</label>
+                        <textarea id="input_1" class="input-field" placeholder="SELECT customer_id FROM orders GROUP BY ... HAVING ..."></textarea>
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const sql = inputs[0].value.trim().toUpperCase();
+                    if (sql.includes("GROUP BY") && sql.includes("HAVING") && sql.includes("1000")) {
+                        return { pass: true, msg: "SQL 語法完全正確！成功使用 GROUP BY customer_id 與 HAVING SUM(amount) > 1000 篩選出高價值客戶。" };
+                    }
+                    return { pass: false, msg: "SQL 語法有誤！\n- 聚合函數條件過濾必須使用 HAVING 而非 WHERE。\n- 正確參考語法：SELECT customer_id FROM orders GROUP BY customer_id HAVING SUM(amount) > 1000" };
+                }
+            },
+            {
+                id: "13", category: "biz", type: "objective", title: "金融科技 FinTech", roles: "風控專家、AML 審查員",
+                npcName: "風控長 Richard", avatarType: "fintech",
+                taskName: "洗錢防制 (AML) 規則引擎特徵設定",
+                desc: "風控系統需設立警示規則：若單一帳號在 24 小時內累積轉帳超過 $100,000，或單筆頻繁轉帳次數超過幾次應觸發人工審核？請選擇業界合規門檻（次數: 5次 / 20次 / 100次）。",
+                render: () => `
+                    <div class="input-group">
+                        <label>異常高頻交易觸發門檻選擇：</label>
+                        <select id="input_1" class="input-field">
+                            <option value="">-- 請選擇合規風控門檻 --</option>
+                            <option value="5">24小時內超過 5 次（高敏感度）</option>
+                            <option value="20">24小時內超過 20 次</option>
+                            <option value="100">24小時內超過 100 次</option>
+                        </select>
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const val = inputs[0].value;
+                    if (val === "5" || val === "20") {
+                        return { pass: true, msg: "風控設定合理！針對異常高頻化交易，設定 5-20 次觸發閾值能有效攔截可疑分流洗錢 (Structuring)。" };
+                    }
+                    return { pass: false, msg: "選擇無效或門檻過鬆！選擇 100 次會產生巨大風控漏洞，極易被洗錢集團利用小額分刷規避防禦。" };
+                }
+            },
+            {
+                id: "14", category: "trade", type: "llm", title: "綠色及可持續發展 (ESG)", roles: "永續顧問、碳盤查專員",
+                npcName: "永續長 Sophia", avatarType: "esg",
+                taskName: "企業溫室氣體範疇一與範疇三 (Scope 1 & 3) 減碳方案",
+                desc: "某製造廠欲降低範疇一（公務車/燃油）與範疇三（員工通勤/供應鏈）的碳排放，請寫出具體可行的轉型措施與效益預估。",
+                render: () => `
+                    <div class="input-group">
+                        <label>範疇一與範疇三的永續減碳計劃：</label>
+                        <textarea id="input_1" class="input-field" placeholder="範疇一：車隊電動化... 範疇三：綠色供應鏈審核與遠距辦公..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "15", category: "tech", type: "llm", title: "數位轉型", roles: "變革管理顧問",
+                npcName: "轉型顧問 Leo", avatarType: "digital",
+                taskName: "傳統企業員工抗拒新系統之變革管理",
+                desc: "傳統老牌企業導入全新 CRM 系統，資深員工因習慣舊 Excel 流程而強烈排斥。請運用 ADKAR 變革模型寫出您的溝通與輔導步驟。",
+                render: () => `
+                    <div class="input-group">
+                        <label>變革管理溝通與激勵機制：</label>
+                        <textarea id="input_1" class="input-field" placeholder="寫下認知建立 (Awareness)、誘因設計 (Desire) 與種子教練培訓..."></textarea>
+                    </div>
+                `
+            },
+            {
+                id: "16", category: "trade", type: "objective", title: "工程與工業安全", roles: "廠務工程師、安衛主管",
+                npcName: "總工程師 師傅", avatarType: "engineer",
+                taskName: "電氣設備維修上鎖掛牌 (LOTO) 安全工序排序",
+                desc: "請將下列 LOTO (Lockout/Tagout) 斷電安全維修步驟，按正確先後順序填入（填寫步驟代碼，如: B->A->C）：<br>A. 切斷主電源開關<br>B. 通知受影響的作業人員<br>C. 上鎖並掛上警示牌<br>D. 進行零能量驗證（測試是否殘留電壓）",
+                render: () => `
+                    <div class="input-group">
+                        <label>請寫出正確的工序順序 (例如: B->A->C->D)：</label>
+                        <input id="input_1" class="input-field" placeholder="字母順序，用箭頭或逗號分隔">
+                    </div>
+                `,
+                checkAnswer: (inputs) => {
+                    const seq = inputs[0].value.trim().toUpperCase().replace(/[^A-D]/g, '');
+                    if (seq === "BACD") {
+                        return { pass: true, msg: "安規工序完全正確！1.通知人員(B) -> 2.切斷電源(A) -> 3.上鎖掛牌(C) -> 4.驗證零能量(D)。" };
+                    }
+                    return { pass: false, msg: `安規工序有誤！\n- 正確順序：BACD (通知 -> 斷電 -> 上鎖 -> 測試零能量)\n- 錯誤原因：切勿在未通知時切斷電源，也絕不能未驗電就開始作業！` };
+                }
+            }
+        ];
+
+        let currentRoom = null;
+        let completedRooms = new Set();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRooms('all');
+        });
+
+        function renderRooms(cat) {
+            const grid = document.getElementById('rooms-grid');
+            grid.innerHTML = '';
+            const filtered = cat === 'all' ? ROOMS_DATA : ROOMS_DATA.filter(r => r.category === cat);
+
+            filtered.forEach(room => {
+                const card = document.createElement('div');
+                card.className = 'room-card';
+                card.onclick = () => openRoom(room.id);
+
+                const typeBadge = room.type === 'objective' 
+                    ? `<span class="room-type-tag type-objective">硬實力精確判斷</span>`
+                    : `<span class="room-type-tag type-llm">軟實力 LLM 評估</span>`;
+
+                card.innerHTML = `
+                    <div>
+                        <div>
+                            <span style="font-size:0.75rem; color:var(--accent-blue); font-weight:bold;">展館 ${room.id}</span>
+                            ${typeBadge}
+                        </div>
+                        <div class="room-title">${room.title}</div>
+                        <div class="room-roles">${room.roles}</div>
+                    </div>
+                    <div class="room-footer">
+                        <span>進入實戰 →</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderRooms(cat);
+        }
+
+        function openRoom(roomId) {
+            currentRoom = ROOMS_DATA.find(r => r.id === roomId);
+
+            document.getElementById('hall-view').style.display = 'none';
+            document.getElementById('room-view').style.display = 'block';
+
+            document.getElementById('npc-avatar').innerHTML = getCartoonAvatarSvg(currentRoom.avatarType);
+            document.getElementById('npc-name').innerText = currentRoom.npcName;
+            document.getElementById('npc-role-tag').innerText = `展館 ${currentRoom.id} 導師`;
+            document.getElementById('npc-text').innerText = `「我是【${currentRoom.title}】的${currentRoom.npcName}。準備好接受今天的實戰考驗了嗎？」`;
+
+            document.getElementById('task-title').innerText = currentRoom.taskName;
+            document.getElementById('task-desc').innerHTML = currentRoom.desc;
+            document.getElementById('result-container').style.display = 'none';
+
+            const workspace = document.getElementById('form-workspace');
+            workspace.innerHTML = currentRoom.render();
+
+            const btnText = document.getElementById('btn-text');
+            btnText.innerText = currentRoom.type === 'objective' ? "提交即時驗證" : "提交給導師進行深度評估";
+        }
+
+        async function submitTask() {
+            const inputs = document.querySelectorAll('#form-workspace input, #form-workspace textarea, #form-workspace select');
+            let hasValue = false;
+            inputs.forEach(i => { if (i.value.trim()) hasValue = true; });
+
+            const resBox = document.getElementById('result-container');
+            resBox.innerHTML = '';
+            resBox.style.display = 'flex';
+
+            if (!hasValue) {
+                resBox.innerHTML = `
+                    <div class="objective-badge badge-error">
+                        <span>✗ [提交失敗]</span>
+                        <span>請先填寫答案或處置方案！</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentRoom.type === 'objective') {
+                const result = currentRoom.checkAnswer(inputs);
+                
+                if (result.pass) {
+                    inputs.forEach(i => i.value = '');
+                    resBox.innerHTML = `
+                        <div class="objective-badge badge-success">
+                            <span>✓ [驗證成功]</span>
+                            <span>${result.msg}</span>
+                        </div>
+                    `;
+                    completedRooms.add(currentRoom.id);
+                    document.getElementById('badge-count').innerText = `${completedRooms.size} / 16`;
+                } else {
+                    resBox.innerHTML = `
+                        <div class="objective-badge badge-error">
+                            <span>✗ [驗證失敗]</span>
+                            <div style="margin-top:0.3rem; white-space:pre-line;">${result.msg}</div>
+                        </div>
+                    `;
+                }
+            } else {
+                const userAns = inputs[0].value.trim();
+                const apiKey = globalVerifiedApiKey || document.getElementById('api-key-input').value.trim();
+                const btnText = document.getElementById('btn-text');
+                const btnSpinner = document.getElementById('btn-spinner');
+
+                btnText.innerText = "導師評估中...";
+                btnSpinner.style.display = "inline-block";
+
+                try {
+                    let analysis = null;
+                    if (apiKey) {
+                        analysis = await fetchGeminiAnalysis(apiKey, currentRoom, userAns);
+                    } else {
+                        analysis = await simulateLLMAnalysis(currentRoom, userAns);
+                    }
+
+                    inputs.forEach(i => i.value = '');
+                    resBox.innerHTML = `
+                        <div class="objective-badge badge-success" style="margin-bottom:0.5rem;">
+                            <span>✓ [提交成功]</span>
+                            <span>導師評估完成！以下為您的處置方案評估報告：</span>
+                        </div>
+                        <div class="analysis-card pros">
+                            <div class="card-header">利處與優勢 (Pros)</div>
+                            <div class="card-content">${analysis.pros}</div>
+                        </div>
+                        <div class="analysis-card cons">
+                            <div class="card-header">潛在風險與盲點 (Cons)</div>
+                            <div class="card-content">${analysis.cons}</div>
+                        </div>
+                        <div class="analysis-card advice">
+                            <div class="card-header">資深人士建議 (Senior Advice)</div>
+                            <div class="card-content">${analysis.advice}\n\n【背後原理】\n${analysis.reason}</div>
+                        </div>
+                    `;
+
+                    completedRooms.add(currentRoom.id);
+                    document.getElementById('badge-count').innerText = `${completedRooms.size} / 16`;
+
+                } catch (e) {
+                    resBox.innerHTML = `
+                        <div class="objective-badge badge-error">
+                            <span>✗ [API 調用失敗 / 評估失敗]</span>
+                            <div style="margin-top:0.3rem; line-height:1.4;">${e.message}</div>
+                        </div>
+                    `;
+                } finally {
+                    btnText.innerText = "提交任務驗證";
+                    btnSpinner.style.display = "none";
+                }
+            }
+        }
+
+        async function fetchGeminiAnalysis(apiKey, room, userAns) {
+            const prompt = `你現在是【${room.title}】的資深專家（${room.npcName}）。
+情境任務：${room.taskName}
+使用者的處置方案："${userAns}"
+
+請針對使用者的回答進行客觀點評，必須輸出嚴格的 JSON 格式，繁體中文回答，結構如下：
+{
+  "pros": "列出此作法的優點與優勢",
+  "cons": "列出此作法潛在風險或執行漏洞",
+  "advice": "資深人士優化建議",
+  "reason": "經驗理由與行業心法"
+}`;
+
+            // 優先調用 Gemini 3.5 Flash
+            const modelsToTry = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+            let lastErrorMsg = "";
+
+            for (const model of modelsToTry) {
+                try {
+                    const endpoint = `[https://generativelanguage.googleapis.com/v1beta/models/$](https://generativelanguage.googleapis.com/v1beta/models/$){model}:generateContent?key=${apiKey}`;
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: { responseMimeType: "application/json" }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (!rawText) throw new Error("API 未傳回有效分析內容。");
+                        return JSON.parse(rawText.replace(/```json/gi, '').replace(/```/g, '').trim());
+                    }
+
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `HTTP ${response.status} (${response.statusText})`;
+                    lastErrorMsg = `[模型 ${model}] ${errMsg}`;
+
+                    if (response.status === 400 || response.status === 403) {
+                        throw new Error(`API 金鑰無效或無存取權限: ${errMsg}`);
+                    }
+                } catch (err) {
+                    if (err.message.includes("API 金鑰無效")) throw err;
+                    lastErrorMsg = err.message;
+                }
+            }
+
+            throw new Error(`調用失敗：${lastErrorMsg}。請檢查 API Key 是否正確或具備該模型存取權限。`);
+        }
+
+        function simulateLLMAnalysis(room, userAns) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        pros: `1. 核心方向明確：針對【${room.taskName}】提出了「${userAns.slice(0, 15)}...」的處置邏輯。\n2. 具備良好前線應變與戰略意識。`,
+                        cons: `1. 執行細節風險：在實際職場中若未考量跨部門權責與時間線，可能引發執行阻力。\n2. 建議增設風險預警備案。`,
+                        advice: `資深導師點評：建議在執行此方案時，同步附上「資源清單與明確 KPI」，能大幅增加可信度。`,
+                        reason: `資深職場經驗顯示：好的策略不僅要解決問題，更要降低合作對象與主管的不確定感。`
+                    });
+                }, 800);
+            });
+        }
+
+        function backToHall() {
+            document.getElementById('room-view').style.display = 'none';
+            document.getElementById('hall-view').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
